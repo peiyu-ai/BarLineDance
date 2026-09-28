@@ -1,0 +1,48 @@
+# K13 (2026-09-27): the version on the Barline project page (pipeline version K13).
+# NOT the default (current.argv is unchanged).  Recorded because until now it existed only as the
+# argv inside each run's manifest.json (runs/t_beat/rK13full_*/manifest.json, generation_config),
+# which this file reproduces flag for flag:
+#   = t1_fix7.argv (T1 library and models)
+#   + F11 (motif returns, the continuity and rhythm scorers, seam lead, source continuation by phrase)
+#   + K13's three retrieval rules, each reading only the query song and the library:
+#       --draft-step-lock-keep 0.3             footfall beat lock
+#       --retrieval-selector-join-band 0.6     wider join pool (was 0.35)
+#       --draft-energy-follow keep=0.3,...     intensity plan + on-beat settle
+#
+# usage (from the repo root):
+#   python3 infer_atomic.py @configs/t_line/k13.argv --audio-dir <music npy dir> \
+#       --sequence-list <list> --output-dir <new dir>
+@configs/t_line/t1_fix7.argv
+--draft-motif-return
+0.15
+--draft-motif-lags
+4,2
+--draft-motif-max
+2
+--draft-motif-pick
+lively
+--draft-continuity-scorer
+/path/to/assets/runs/continuation_scorer/cont_v1_mask6_s0.pt
+--draft-continuity-keep
+0.75
+--draft-rhythm-scorer
+/path/to/assets/runs/rhythm_scorer/rhythm_scorer_v5_rhythm3_w128.pt
+--draft-rhythm-keep
+0.75
+--draft-seam-lead
+0.75
+--draft-continue-source
+/path/to/assets/runs/src_t_seg_beat4/segmentation.json
+--draft-continue-lookahead
+--draft-continue-any-label
+--draft-continue-max-run
+4
+--draft-continue-phrase
+4
+--draft-continue-no-replay
+--draft-step-lock-keep
+0.3
+--retrieval-selector-join-band
+0.6
+--draft-energy-follow
+keep=0.3,smooth=2,metric=both,hit=0.3
