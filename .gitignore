@@ -1,0 +1,184 @@
+# Python and local tooling
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+
+# Local publication/reference drafts
+/InteractMove-README.md
+/_ECCV2026_Atomic_Dance_Camera_-2.pdf
+
+# Environments and experiment tracking
+.env
+.venv/
+venv/
+wandb/
+runs/
+
+# Datasets and licensed assets
+/train/
+/test/
+/edge_aistpp/
+/data/edge_aistpp/
+/data/atomic_aistpp
+/data/wild3d/
+/genre/
+/dataset_backups/
+/smpl/
+/custom_music/
+/dataset/preprocess_atomic_aistpp.py
+
+# Optional external world-HMR checkout.  Its code and separately licensed
+# weights/models are local runtime dependencies, not project source.
+/third_party/WHAM/
+
+# Evaluation caches, generated motions, and metric outputs
+/eval/evaluate-old.py
+/eval/eval_pfc.py
+/eval/*cache*/
+/eval/147inf/
+/eval/*generated*/
+/eval/generated_*/
+/eval/results*.json
+/eval/*results*.json
+/cached_features/
+/renders/
+
+# Model checkpoints and generated/binary data
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.npy
+*.npz
+*.wav
+*.mp3
+*.zip
+*.tar
+*.tar.gz
+*.gif
+*.mp4
+/third_party/GVHMR
+/third_party/tram/
+/data/aist_videos
+/data/aist_visual_s3d
+/data/aistpp_official
+/data/aist_music
+/data/aist_music_val/
+/data/wild_videos_all/
+/data/wild_videos_pilot/
+/data/wild_videos_shard*/
+/data/wild_visual_s3d
+/logs/
+/third_party/TMR/
+/third_party/QwenVL/
+
+# 2026-08-11 front-end rebuild.  The pattern list above is per-extension, which
+# is not enough here: the ingest writes whole clip *directories* (mp4 + wav +
+# npy + npz + json), and json is not ignored, so a blanket `git add` would
+# commit tens of thousands of meta.json files pointing at data that is not in
+# git.  Ignore the trees, the way /third_party/TMR/ is ignored.
+/data/wild_ingest_v1
+/data/wild_videos_20260811
+/data/wild_videos_converted*/
+/data/wild_videos_pending_3d/
+/data/wild_videos_redo_3d/
+/data/wild_visual_s3d_*/
+/data/wild3d/ingest_v1_*/
+/data/atomic_aistpp
+/runs
+# DWPose's ONNX weights are 335 MB and live in the OSS store like the rest of
+# third_party; the vendored source next to them is small and *is* tracked.
+/third_party/DWPose/weights/
+/third_party/PoseScript/
+
+# 2026-08-12: the workspace NAS quota filled, so these moved into the asset
+# cache and are symlinks now.  A trailing slash would not match a symlink --
+# the same trap /third_party/GVHMR hit.
+/data/wild_videos_20260811
+
+# NFS silly-rename leftovers.  Replacing a script that running shells hold
+# open leaves one of these until the last reader exits -- which is the sign
+# the atomic swap worked, not a problem.
+.nfs*
+
+# 2026-08-17: /data/aistpp_official and /data/wild_ingest_v1 were written with a
+# trailing slash on the line right below the note saying a trailing slash does
+# not match a symlink, and both had since become symlinks into the asset cache.
+# Third and fourth time.  The rule is: never a trailing slash on anything under
+# /data or /third_party, because anything there may be evicted to /cache and come
+# back as a link (tools/oss_assets.py pull --cache does exactly that).
+# Reference PDFs, alongside the existing block above.
+/PoseScript.pdf
+/WGHMR.pdf
+/zero-shot natural language video localization.pdf
+# ossutil writes a .report per transfer next to the CWD.
+/ossutil_output
+# Rendered example pages; the tool that makes them is the artifact.
+/output
+.venv_*
+
+# SMPL body models: licence-gated downloads, 800 MB, and reproducible from the
+# vendor's own zip by the one-time chumpy conversion recorded in worklog:3931.
+# The UV unwrap, the appearance texture and the body-part segmentation DO belong
+# here -- they are small, they are what a render's look depends on, and their
+# provenance is in third_party/smpl_models/uv/PROVENANCE.md.
+/third_party/smpl_models/*.pkl
+/third_party/smpl_models/*.zip
+# The VRM avatar is a 10 MB vendor sample; PROVENANCE.md records where to get it.
+/third_party/vrm/*.glb
+
+# Per-machine Claude Code settings; the .local suffix means not shared.
+.claude/settings.local.json
+
+# ---------------------------------------------------------------------------
+# BarlineDance publication rules (2026-09-28): the public repo carries code and docs only.
+# Credentials and account cookies -- never, in any form.
+ossutilconfig
+.ossutilconfig
+*ossutilconfig*
+cookie/
+cookies/
+*cookies*.json
+.secrets/
+.env*
+*.pem
+*.key
+id_rsa*
+# Video and audio (samples, renders, songs).
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.gif
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.aac
+*.ogg
+*.opus
+/songs
+# Papers and the paper's project page.
+*.pdf
+/project_page
+# Large preprocess artifacts, datasets, weights and vendor binaries.
+/data/wild_videos*
+/aist_baseline_feats
+*.onnx
+*.safetensors
+*.bin
+*.h5
+*.exe
+*.fbx
+/SMPL-to-FBX/*.exe
+/SMPL-to-FBX/*.fbx
+.claude/

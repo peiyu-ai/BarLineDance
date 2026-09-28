@@ -1,0 +1,89 @@
+# T line, T2 (2026-09-22): the CURRENT generation config (selected by current.argv).
+# Same flag set as T1 fix7 -- T2 changes the data and the models, not the recipe:
+#   library     scratch/txy_t2/release_aligned_k8_20260922   (+24 clips from 17 new uploads,
+#               6112 train windows vs 5329; frozen k8 labels, same normalizer bytes 79a7867f)
+#   planner     planner_aligned_k8_t2_sd20260901/planner_step4500.pt  (shipped argv, 300 epochs,
+#               final checkpoint).  SEED CHOSEN ON VAL (2026-09-22): of the two seeds, 20260901
+#               keeps the beat hitting of the T1 pipeline (val-30 settle_gain vs A0 -0.009, 12/29,
+#               P=0.46; test-20 +0.013) while 20260902 loses it (val -0.064, 8/29, P=0.024) --
+#               the planner seed moved this column as much as the library did.
+#   completion  completion_txy_t2_seam4_sd20260902/completion_step57600.pt (shipped argv,
+#               600 epochs, final checkpoint)
+#   sidecars    scratch/txy_t2/sidecars_aligned_k8_20260922/  (regenerated from the T2 library:
+#               name coverage alone cannot tell T1 files from T2 ones)
+#   selector    unchanged (retrieval_selector_txy_t; no library index in it)
+#   --floor-anchor 0.3391 = median per-clip floor over the 278 T2 train clips, the rule that
+#               gave T1's 0.3396 over its 245 (re-measured: 0.3396)
+#   --retrieval-max-yaw-step 25.2 / --retrieval-max-speed-spike 3.62 carried over unchanged
+#   --ingest-root is the re-decoded audio overlay (T1 audio.wav is up to 161 ms early)
+# infer_atomic refuses a planner/completion trained on a different release than --data-root
+# was derived from (manifest "release_binding"), so this file cannot silently pair old and new.
+#
+# usage (from the repo root; per-invocation flags go AFTER the @file and win):
+#   python3 infer_atomic.py @configs/t_line/current.argv --audio-dir <music npy dir> \
+#       --sequence-list <list> --output-dir <new dir> [--dump-draft-dir <dir>]
+--data-root
+/cache/atomicdance-assets/scratch/txy_t2/release_aligned_k8_20260922
+--planner-checkpoint
+/cache/atomicdance-assets/runs/planner_aligned_k8_t2_sd20260901/planner_step4500.pt
+--completion-checkpoint
+/cache/atomicdance-assets/runs/completion_txy_t2_seam4_sd20260902/completion_step57600.pt
+--completion-inpaint-seam-width
+8
+--completion-keep-root
+--derive-retrieval-group
+--stochastic-planner
+--draft-bar-prototypes
+--draft-facing-anchor
+0.6
+--draft-facing-continuity
+--draft-recurrence-variety
+--draft-seam-aware-retrieval
+--draft-seam-blend
+8
+--draft-seam-stagger
+--draft-seam-window
+cosine
+--face-camera
+0.7
+--fix-foot-skate
+1.0
+--floor-anchor
+0.3391
+--index-filler
+--plan-bar-grid
+--plan-bar-tokens
+--plan-min-segment
+1
+--plan-vote-window
+1
+--retrieval-rule
+learned
+--retrieval-selector
+/cache/atomicdance-assets/runs/retrieval_selector_txy_t/selector.pt
+--retrieval-selector-join-band
+0.35
+--seed
+20260902
+--draft-root-continuity
+xy
+--draft-floor-normalize
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/recording_floors.json
+--draft-beat-span
+0.25
+--fix-skate-seam-mask
+8
+--draft-root-seam-smooth
+8
+--retrieval-max-yaw-step
+25.2
+--retrieval-yaw-steps
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps.npz
+--retrieval-max-speed-spike
+3.62
+--retrieval-speed-spikes
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps_speed.npz
+--draft-unit-floor
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_local_floor.npz
+--ingest-root
+/cache/atomicdance-assets/data/wild_ingest_txy_t2_audiofix

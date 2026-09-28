@@ -1,0 +1,66 @@
+% Overall architecture of BarLine Dance (TikZ).
+\begin{tikzpicture}[
+  font=\sffamily\footnotesize,
+  >=Stealth,
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm, inner sep=3pt, line width=0.5pt},
+  data/.style={box, fill=gray!8},
+  learn/.style={box, fill=blue!10, draw=blue!60!black},
+  rule/.style={box, fill=orange!12, draw=orange!70!black},
+  outp/.style={box, fill=green!10, draw=green!45!black},
+  arr/.style={->, line width=0.6pt},
+  lane/.style={draw=gray!50, dashed, rounded corners=4pt},
+  lbl/.style={font=\sffamily\scriptsize\bfseries, text=gray!70!black, anchor=south west, inner sep=1pt}
+]
+% ---------------- Offline: corpus construction ----------------
+\node[data] (vid) at (0,0) {In-the-wild\\dance videos};
+\node[rule, right=5mm of vid] (ing) {Content-aware\\clip cutting\\{\scriptsize shots, dancer track}};
+\node[learn, right=5mm of ing] (hmr) {World-grounded\\3D recovery\\{\scriptsize GVHMR / DPVO}};
+\node[rule, right=5mm of hmr] (rep) {151-D motion\\{\scriptsize contacts+root+rot6d}};
+\node[rule, right=5mm of rep] (bar) {Beat tracking\\4-beat bar cuts};
+\node[learn, right=5mm of bar] (voc) {Bar-level\\movement\\vocabulary (K)};
+\node[data, below=6mm of voc] (lib) {Movement library\\{\scriptsize real bars + provenance}};
+\draw[arr] (vid) -- (ing);
+\draw[arr] (ing) -- (hmr);
+\draw[arr] (hmr) -- (rep);
+\draw[arr] (rep) -- (bar);
+\draw[arr] (bar) -- (voc);
+\draw[arr] (voc) -- (lib);
+\begin{scope}[on background layer]
+  \node[lane, fit=(vid)(ing)(hmr)(rep)(bar)(voc)(lib), inner sep=5pt, label={[lbl]north west:(a) Offline corpus construction}] (laneA) {};
+\end{scope}
+
+% ---------------- Inference ----------------
+\node[data] (song) at (0,-4.0) {Input song};
+\node[rule, right=5mm of song] (mus) {Music features\\beat / bar grid\\{\scriptsize 35-D, loudness}};
+\node[learn, right=5mm of mus] (plan) {\textbf{Bar planner}\\one label per bar\\{\scriptsize full-song context}};
+\node[learn, right=7mm of plan, minimum width=33mm] (ret) {\textbf{Label$\rightarrow$motion}\\retrieve $\cdot$ stretch $\cdot$ score\\{\scriptsize selector, rhythm, continuation,}\\{\scriptsize step lock, energy follow}};
+\node[learn, right=7mm of ret] (comp) {\textbf{Seam}\\\textbf{completion}\\{\scriptsize diffusion inpainting}\\{\scriptsize around bar lines}};
+\node[outp, right=5mm of comp] (d3) {3D dance\\{\scriptsize SMPL}};
+\draw[arr] (song) -- (mus);
+\draw[arr] (mus) -- (plan);
+\draw[arr] (plan) -- node[above, font=\sffamily\scriptsize]{plan} (ret);
+\draw[arr] (ret) -- node[above, font=\sffamily\scriptsize]{draft} (comp);
+\draw[arr] (comp) -- (d3);
+\draw[arr, draw=gray!60!black] (lib.south) |- ([yshift=4mm]ret.north) -- (ret.north);
+\draw[arr, draw=gray!60!black] (mus.south) -- ++(0,-5mm) -| (ret.south);
+\begin{scope}[on background layer]
+  \node[lane, fit=(song)(mus)(plan)(ret)(comp)(d3), inner sep=5pt, label={[lbl]north west:(b) Music-only inference}] (laneB) {};
+\end{scope}
+
+% ---------------- Rendering ----------------
+\node[outp, below=10mm of d3] (strip) {Review strip\\{\scriptsize video+skeleton+avatar+plan}};
+\node[outp, left=6mm of strip] (r2d) {2D character video\\{\scriptsize AAPose $\rightarrow$ SteadyDancer}};
+\draw[arr] (d3) -- (strip);
+\draw[arr] (d3.south) |- ++(-5mm,-3mm) -| (r2d.north);
+\begin{scope}[on background layer]
+  \node[lane, fit=(strip)(r2d), inner sep=5pt, label={[lbl, anchor=north west]south west:(c) Rendering / review}] {};
+\end{scope}
+
+% legend
+\node[learn, minimum height=4mm, minimum width=6mm, inner sep=1pt] (lg1) at (0.2,-6.7) {};
+\node[right=1mm of lg1, font=\sffamily\scriptsize] (t1) {learned};
+\node[rule, minimum height=4mm, minimum width=6mm, inner sep=1pt, right=3mm of t1] (lg2) {};
+\node[right=1mm of lg2, font=\sffamily\scriptsize] (t2) {deterministic};
+\node[data, minimum height=4mm, minimum width=6mm, inner sep=1pt, right=3mm of t2] (lg3) {};
+\node[right=1mm of lg3, font=\sffamily\scriptsize] {data};
+\end{tikzpicture}

@@ -1,0 +1,208 @@
+# AtomicDance local changes to ComfyUI-WanVideoWrapper, as RUNNING on 2026-09-21.
+# One diff against upstream HEAD df8f3e4: the MTV changes (window_reference, motion_cfg,
+# RoPE freqs) and the SteadyDancer reference-pairing options (ref_pose, ref_pose_latent,
+# window_reference, pose_clip). Replaces the separate steadydancer_ref patch, which did not
+# apply on top of the checked-in MTV patch. Apply with: git apply wanvideowrapper_local.patch
+diff --git a/nodes.py b/nodes.py
+index 00ad6fc..4af2bdd 100644
+--- a/nodes.py
++++ b/nodes.py
+@@ -877,6 +877,13 @@ class WanVideoAddMTVMotion:
+                     "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "Strength of the MTV motion"}),
+                     "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Start percent to apply the ref "}),
+                     "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "End percent to apply the ref "}),
++                },
++                "optional": {
++                    # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv.patch):
++                    # guidance on the motion axis; 1.0 = off, one extra pass per step above that.
++                    "motion_cfg": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 10.0, "step": 0.1, "tooltip": "Classifier-free guidance on the MTV motion itself"}),
++                    "negative_guidance": ("BOOLEAN", {"default": False, "tooltip": "Guide away from the NEGATIVE prompt as well as away from no-motion (one pass, both axes)"}),
++                    "window_reference": (["on", "soft", "off"], {"default": "on", "tooltip": "Each context window's first frame: 'on' takes the reference image's conditioning (upstream), 'soft' takes its appearance but keeps the window's own mask, 'off' leaves the window alone"}),
+                 }
+         }
+ 
+@@ -885,7 +892,8 @@ class WanVideoAddMTVMotion:
+     FUNCTION = "add"
+     CATEGORY = "WanVideoWrapper"
+ 
+-    def add(self, embeds, mtv_crafter_motion, strength, start_percent, end_percent):
++    def add(self, embeds, mtv_crafter_motion, strength, start_percent, end_percent, motion_cfg=1.0,
++            negative_guidance=False, window_reference="on"):
+         # Prepare the new extra latent entry
+         new_entry = {
+             "mtv_motion_tokens": mtv_crafter_motion["mtv_motion_tokens"],
+@@ -893,7 +901,10 @@ class WanVideoAddMTVMotion:
+             "start_percent": start_percent,
+             "end_percent": end_percent,
+             "global_mean": mtv_crafter_motion["global_mean"],
+-            "global_std": mtv_crafter_motion["global_std"]
++            "global_std": mtv_crafter_motion["global_std"],
++            "motion_cfg": motion_cfg,
++            "negative_guidance": negative_guidance,
++            "window_reference": window_reference,
+         }
+ 
+         # Return a new dict with updated extra_latents
+diff --git a/nodes_sampler.py b/nodes_sampler.py
+index dfe17ad..1868c32 100644
+--- a/nodes_sampler.py
++++ b/nodes_sampler.py
+@@ -681,7 +681,9 @@ class WanVideoSampler:
+                 latent_video_length if context_options is None else context_frames,
+                 24, mtv_input["global_mean"], [mtv_input["global_std"]], device=device)
+             log.info(f"mtv_motion_rotary_emb: {motion_rotary_emb[0].shape}")
+-            mtv_freqs = mtv_freqs.to(device, dtype)
++            # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv_freqs.patch):
++            # rope_apply_3d multiplies view_as_complex(x) by these; a real dtype keeps only cos.
++            mtv_freqs = mtv_freqs.to(device)
+ 
+         #region S2V
+         s2v_audio_input = s2v_ref_latent = s2v_pose = s2v_ref_motion = None
+@@ -1095,6 +1097,10 @@ class WanVideoSampler:
+                 log.info(f"  {k}: {v.shape if isinstance(v, torch.Tensor) else v}")
+             sdancer_data = sdancer_embeds.copy()
+             sdancer_data = dict_to_device(sdancer_data, device, dtype)
++            # AtomicDance local patch: the GLOBAL reference latent, for SteadyDancer's reference
++            # tokens when windows no longer carry it in their first frame.
++            if image_cond is not None:
++                sdancer_data["ref_x_global"] = image_cond[4:, :1].to(device, dtype)
+ 
+         # One-to-all-Animation
+         one_to_all_embeds = image_embeds.get("one_to_all_embeds", None)
+@@ -1356,6 +1362,16 @@ class WanVideoSampler:
+                     sdancer_input["cond_neg"] = sdancer_data["cond_neg"][:, context_window] if sdancer_data.get("cond_neg", None) is not None else None
+                 else:
+                     sdancer_input = sdancer_data
++                # AtomicDance local patch: which pose the reference image is paired with, and where
++                # the reference appearance enters when windows do not inject it.
++                if sdancer_input is not None:
++                    sdancer_input = dict(sdancer_input)
++                    if sdancer_data.get("ref_c_latent", None) is not None:
++                        sdancer_input["ref_c"] = sdancer_data["ref_c_latent"]
++                    elif sdancer_data.get("ref_pose", "window_first") == "clip_first":
++                        sdancer_input["ref_c"] = sdancer_data["cond_pos"][:, :1]
++                    if sdancer_data.get("window_reference", "on") == "off":
++                        sdancer_input["ref_x"] = sdancer_data.get("ref_x_global", None)
+ 
+                 if s2v_pose is not None:
+                     if not ((s2v_pose_start_percent <= current_step_percentage <= s2v_pose_end_percent) or \
+@@ -1525,6 +1541,26 @@ class WanVideoSampler:
+                                 noise_pred_no_portrait, noise_pred_ovi, cache_state_uncond = transformer(context=positive_embeds, pred_id=cache_state[0] if cache_state else None,
+                                 vace_data=vace_data, attn_cond=attn_cond, **base_params)
+                                 return noise_pred_no_portrait[0] + portrait_cfg[idx] * (noise_pred_cond - noise_pred_no_portrait[0]), noise_pred_ovi, [cache_state_cond, cache_state_uncond]
++                            elif (mtv_input is not None and mtv_input.get("motion_cfg", 1.0) > 1.0
++                                  and base_params.get("mtv_motion_tokens") is not None):
++                                # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv.patch):
++                                # guidance on the MOTION axis, the way this file already does it for
++                                # fantasy_portrait and audio.  Upstream MTV-Crafter guides motion with
++                                # learnable unconditional tokens, which this checkpoint does not carry;
++                                # dropping the tokens is the nearest stand-in.  Off unless MTV_MOTION_CFG > 1.
++                                base_params["mtv_motion_tokens"] = None
++                                # With negative_guidance the one extra pass carries both axes, the way the
++                                # lynx and one-to-all branches below do it: away from (negative text, no
++                                # motion) toward (positive text, motion).  That is what puts upstream's
++                                # "bad hands, extra limbs, fused fingers" to work at cfg 1, where a
++                                # cfg-distilled LoRA otherwise leaves the negative prompt unused.
++                                away_context = (negative_embeds if (mtv_input.get("negative_guidance")
++                                                and negative_embeds is not None) else positive_embeds)
++                                noise_pred_no_motion, noise_pred_ovi, cache_state_uncond = transformer(
++                                    context=away_context, pred_id=cache_state[0] if cache_state else None,
++                                    vace_data=vace_data, attn_cond=attn_cond, **base_params)
++                                return (noise_pred_no_motion[0] + mtv_input["motion_cfg"] * (noise_pred_cond - noise_pred_no_motion[0]),
++                                        noise_pred_ovi, [cache_state_cond, cache_state_uncond])
+                             elif multitalk_audio_input is not None and not math.isclose(audio_cfg_scale[idx], 1.0):
+                                 base_params['multitalk_audio'] = torch.zeros_like(multitalk_audio_input)[-1:]
+                                 noise_pred_uncond_audio, _, cache_state_uncond = transformer(
+@@ -1899,8 +1935,26 @@ class WanVideoSampler:
+                                         new_init_image = context_reference_latent[extra_init_index, :, 0].to(device)
+                                         partial_img_emb[:, 0] = torch.cat([image_cond[:4, 0].to(device), new_init_image], dim=0)
+                                 else:
+-                                    new_init_image = image_cond[:, 0].to(device)
+-                                    partial_img_emb[:, 0] = new_init_image
++                                    # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv.patch):
++                                    # upstream overwrites every later window's FIRST frame with the reference
++                                    # image's conditioning -- appearance AND the "this frame is given" mask.
++                                    # With MTV motion that frame is mid-dance, so the window is told it starts
++                                    # from the standing reference; measured 2026-09-18 as near-static stretches
++                                    # and the outfit re-forming.  "off" removes the anchor entirely and the
++                                    # later windows wash out, so "soft" keeps the reference APPEARANCE
++                                    # (latent channels) and leaves the window's own mask alone.
++                                    mode = "on" if mtv_input is None else mtv_input.get("window_reference", "on")
++                                    if mtv_input is None and sdancer_data is not None:
++                                        mode = sdancer_data.get("window_reference", "on")
++                                    if mode is True:
++                                        mode = "on"
++                                    elif mode is False:
++                                        mode = "off"
++                                    if mode == "on":
++                                        new_init_image = image_cond[:, 0].to(device)
++                                        partial_img_emb[:, 0] = new_init_image
++                                    elif mode == "soft":
++                                        partial_img_emb[4:, 0] = image_cond[4:, 0].to(device)
+ 
+                                 if control_latents is not None:
+                                     partial_control_latents = control_latents[:, c]
+diff --git a/steadydancer/nodes.py b/steadydancer/nodes.py
+index 618f7c1..c64491c 100644
+--- a/steadydancer/nodes.py
++++ b/steadydancer/nodes.py
+@@ -29,7 +29,17 @@ class WanVideoAddSteadyDancerEmbeds:
+                 "optional": {
+                     "pose_latents_negative": ("LATENT",),
+                     "clip_vision_embeds": ("WANVIDIMAGE_CLIPEMBEDS",),
+-                    
++                    # AtomicDance local patch (render2d/patches/wanvideowrapper_steadydancer_ref.patch).
++                    # Under context windows upstream pairs the reference IMAGE with the pose latent of
++                    # each WINDOW's first frame; SteadyDancer's reference pair is the reference image
++                    # and ITS OWN pose (first-frame preservation: frame 0 IS the reference).
++                    "ref_pose": (["window_first", "clip_first"], {"default": "window_first", "tooltip": "Pose paired with the reference image in every window: the window's own first frame (upstream) or the clip's frame 0"}),
++                    "ref_pose_latent": ("LATENT", {"tooltip": "Explicit pose latent of the reference image; overrides ref_pose"}),
++                    "window_reference": (["on", "off"], {"default": "on", "tooltip": "'on' (upstream) overwrites each later window's first frame with the reference image's conditioning; 'off' leaves it alone and feeds the reference to SteadyDancer's reference tokens only"}),
++                    # Upstream stores clip_vision_embeds as "clip_fea" while model.py reads "clip_fea_c",
++                    # so the trained img_emb(CLIP(ref)) + img_emb(CLIP(first pose frame)) is silently
++                    # img_emb(CLIP(ref)) alone.  "on" delivers it under the key the model reads.
++                    "pose_clip": (["off", "on"], {"default": "off", "tooltip": "Deliver clip_vision_embeds (CLIP of the pose frame paired with the reference) to the model, as trained"}),
+                 }
+         }
+ 
+@@ -38,7 +48,8 @@ class WanVideoAddSteadyDancerEmbeds:
+     FUNCTION = "add"
+     CATEGORY = "WanVideoWrapper"
+ 
+-    def add(self, embeds, pose_latents_positive, pose_strength_spatial, pose_strength_temporal, start_percent=0.0, end_percent=1.0, pose_latents_negative=None, clip_vision_embeds=None):
++    def add(self, embeds, pose_latents_positive, pose_strength_spatial, pose_strength_temporal, start_percent=0.0, end_percent=1.0, pose_latents_negative=None, clip_vision_embeds=None,
++            ref_pose="window_first", ref_pose_latent=None, window_reference="on", pose_clip="off"):
+         sdancer_embeds = {
+             "cond_pos": pose_latents_positive["samples"][0],
+             "cond_neg": pose_latents_negative["samples"][0] if pose_latents_negative else None,
+@@ -47,7 +58,12 @@ class WanVideoAddSteadyDancerEmbeds:
+             "start_percent": start_percent,
+             "end_percent": end_percent,
+             "clip_fea": clip_vision_embeds,
++            "ref_pose": ref_pose,
++            "ref_c_latent": ref_pose_latent["samples"][0][:, :1] if ref_pose_latent is not None else None,
++            "window_reference": window_reference,
+         }
++        if pose_clip == "on" and clip_vision_embeds is not None:
++            sdancer_embeds["clip_fea_c"] = clip_vision_embeds.get("clip_embeds", None)
+ 
+         updated = dict(embeds)
+         updated["sdancer_embeds"] = sdancer_embeds
+diff --git a/wanvideo/modules/model.py b/wanvideo/modules/model.py
+index 48d1b07..3d1cf22 100644
+--- a/wanvideo/modules/model.py
++++ b/wanvideo/modules/model.py
+@@ -2556,9 +2556,13 @@ class WanModel(torch.nn.Module):
+         # SteadyDancer
+         if sdancer_enabled:
+             ref_x = y[0][4:, :1] # reuse I2V input as reference, slice mask off
++            if sdancer_input.get("ref_x", None) is not None:  # AtomicDance local patch
++                ref_x = sdancer_input["ref_x"].to(ref_x)
+             msk = torch.ones(4, 1, H, W, device=ref_x.device) # new mask goes in middle
+             ref_x = [torch.concat([ref_x, msk, ref_x])]
+             ref_c = sdancer_cond[0][:, :1]
++            if sdancer_input.get("ref_c", None) is not None:  # AtomicDance local patch
++                ref_c = sdancer_input["ref_c"].to(ref_c)
+             ref_c = [torch.concat([ref_c, msk * 0, ref_c])] # zero mask for cond ref
+             # Condition Fusion/Injection, Hierarchical Aggregation (2): x, fused condition, aligned condition
+             x = [self.patch_embedding_fuse(torch.cat([u[None], c[None], a[None]], 1)) for u, c, a in zip(x, condition_fused, condition_aligned)]

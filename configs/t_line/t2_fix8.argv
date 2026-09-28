@@ -1,0 +1,72 @@
+# T line: T2 data/models with the fix8 RECIPE (docs/DANCE_QUALITY_DEFECTS.md §90, 2026-09-22).
+# NOT the default: fix8 has no recorded operator verdict yet (current.argv keeps fix7's recipe).
+# If fix8 is adopted, point current.argv at this file -- the new library and models come with it.
+# = t2.argv minus --draft-seam-stagger and --completion-inpaint-seam-width, --draft-seam-blend 8->12,
+#   plus --seam-transition after --draft-only (the §90.5 deltas from fix7).  Note --draft-only means
+#   the completion model is loaded but not run: under fix8 the new motions reach the dance through
+#   the T2 library and the T2 planner only.
+--data-root
+/cache/atomicdance-assets/scratch/txy_t2/release_aligned_k8_20260922
+--planner-checkpoint
+/cache/atomicdance-assets/runs/planner_aligned_k8_t2_sd20260901/planner_step4500.pt
+--completion-checkpoint
+/cache/atomicdance-assets/runs/completion_txy_t2_seam4_sd20260902/completion_step57600.pt
+--completion-keep-root
+--derive-retrieval-group
+--stochastic-planner
+--draft-bar-prototypes
+--draft-facing-anchor
+0.6
+--draft-facing-continuity
+--draft-recurrence-variety
+--draft-seam-aware-retrieval
+--draft-seam-blend
+12
+--draft-seam-window
+cosine
+--face-camera
+0.7
+--fix-foot-skate
+1.0
+--floor-anchor
+0.3391
+--index-filler
+--plan-bar-grid
+--plan-bar-tokens
+--plan-min-segment
+1
+--plan-vote-window
+1
+--retrieval-rule
+learned
+--retrieval-selector
+/cache/atomicdance-assets/runs/retrieval_selector_txy_t/selector.pt
+--retrieval-selector-join-band
+0.35
+--seed
+20260902
+--draft-root-continuity
+xy
+--draft-floor-normalize
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/recording_floors.json
+--draft-beat-span
+0.25
+--fix-skate-seam-mask
+8
+--draft-root-seam-smooth
+8
+--retrieval-max-yaw-step
+25.2
+--retrieval-yaw-steps
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps.npz
+--retrieval-max-speed-spike
+3.62
+--retrieval-speed-spikes
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps_speed.npz
+--draft-unit-floor
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_local_floor.npz
+--ingest-root
+/cache/atomicdance-assets/data/wild_ingest_txy_t2_audiofix
+--seam-transition
+after
+--draft-only

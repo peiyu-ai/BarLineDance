@@ -1,0 +1,80 @@
+# T1 = fix7 (A0) with the seam moved AFTER the bar line, completion kept (DEFECTS §95): the arriving unit is held
+# to the line, --completion-inpaint-seam-width regenerates [seam, seam+width) only.  Experimental, not the default.
+# T line, T1 = arm fix7 (2026-09-17): the shipped generation config before the T2 upgrade.
+# Kept as a NAMED FALLBACK so T1 stays reproducible; not the default (see current.argv).
+# Source: runs/txy_t2_20260922/preserved_from_516f17be/argv_fix7.txt, with the per-invocation
+# flags removed (--audio-dir, --sequence-list, --output-dir, --dump-draft-dir) and the
+# implicit --ingest-root written out.  Re-running it on runs/eval_clips_txy_t20.txt with
+# --audio-dir runs/txy_t_gt_eval/audio reproduced fix7a_20 byte-for-byte (20/20 pkl md5).
+# NOTE the T1 audio in data/wild_ingest_v1 / runs/txy_t_gt_eval is up to 161 ms early
+# (memory: ingest-audio-is-161ms-early-since-0902).
+#
+# usage (from the repo root):
+#   python3 infer_atomic.py @configs/t_line/t1_fix7.argv --audio-dir <music npy dir> \
+#       --sequence-list <list> --output-dir <new dir> [--dump-draft-dir <dir>]
+--data-root
+/cache/atomicdance-assets/scratch/txy_t/release_aligned_k8
+--planner-checkpoint
+/cache/atomicdance-assets/runs/planner_aligned_k8/planner_step3900.pt
+--completion-checkpoint
+/cache/atomicdance-assets/runs/completion_txy_t_seam4_s20260905/completion_step50400.pt
+--completion-inpaint-seam-width
+8
+--completion-keep-root
+--derive-retrieval-group
+--stochastic-planner
+--draft-bar-prototypes
+--draft-facing-anchor
+0.6
+--draft-facing-continuity
+--draft-recurrence-variety
+--draft-seam-aware-retrieval
+--draft-seam-blend
+8
+--draft-seam-window
+cosine
+--face-camera
+0.7
+--fix-foot-skate
+1.0
+--floor-anchor
+0.3396
+--index-filler
+--plan-bar-grid
+--plan-bar-tokens
+--plan-min-segment
+1
+--plan-vote-window
+1
+--retrieval-rule
+learned
+--retrieval-selector
+/cache/atomicdance-assets/runs/retrieval_selector_txy_t/selector.pt
+--retrieval-selector-join-band
+0.35
+--seed
+20260902
+--draft-root-continuity
+xy
+--draft-floor-normalize
+data/wild3d/txy_t_normalized/recording_floors.json
+--draft-beat-span
+0.25
+--fix-skate-seam-mask
+8
+--draft-root-seam-smooth
+8
+--retrieval-max-yaw-step
+25.2
+--retrieval-yaw-steps
+data/wild3d/txy_t_normalized/release_yaw_steps.npz
+--retrieval-max-speed-spike
+3.62
+--retrieval-speed-spikes
+data/wild3d/txy_t_normalized/release_yaw_steps_speed.npz
+--draft-unit-floor
+data/wild3d/txy_t_normalized/release_local_floor.npz
+--ingest-root
+data/wild_ingest_v1
+--seam-transition
+after

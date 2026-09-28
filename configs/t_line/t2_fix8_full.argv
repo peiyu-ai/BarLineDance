@@ -1,0 +1,85 @@
+# T line: T2 data/models, the "打满" recipe (DEFECTS §92, 2026-09-23).  NOT the default: no operator verdict yet.
+# = t2_fix8_cont.argv + --draft-prefer-full 0.25 --draft-prefer-full-mode stops --draft-hold-by-music
+#   * continuation: a bar line is the source dancer's own where it can be (any label, <= 4 bars in a row)
+#   * prefer-full (stops): among the candidates that fit the slot, keep the quarter whose moves LAND most
+#     extended (arm raise / elbow straightness / reach at the wrist's stops), before the join band and the
+#     selector choose; hold-by-music keeps held shapes in the sparse bars.
+# Paired per clip against t2_fix8_cont on the same plan (test-20 / val-30): reach at arrival +0.041 / +0.059
+# (15/20, 24/30), elbow at arrival +7.3 / +9.6 deg, wrist span p90 +0.11 / +0.11, all P<0.05; energy vs GT
+# 1.137 / 1.067 (band [0.85, 1.15]), jitter 0.034 / 0.040, skate 0.286 / 0.282, accents/s unchanged.
+--data-root
+/cache/atomicdance-assets/scratch/txy_t2/release_aligned_k8_20260922
+--planner-checkpoint
+/cache/atomicdance-assets/runs/planner_aligned_k8_t2_sd20260901/planner_step4500.pt
+--completion-checkpoint
+/cache/atomicdance-assets/runs/completion_txy_t2_seam4_sd20260902/completion_step57600.pt
+--completion-keep-root
+--derive-retrieval-group
+--stochastic-planner
+--draft-bar-prototypes
+--draft-facing-anchor
+0.6
+--draft-facing-continuity
+--draft-recurrence-variety
+--draft-seam-aware-retrieval
+--draft-seam-blend
+12
+--draft-seam-window
+cosine
+--face-camera
+0
+--fix-foot-skate
+1.0
+--floor-anchor
+0.3391
+--index-filler
+--plan-bar-grid
+--plan-bar-tokens
+--plan-min-segment
+1
+--plan-vote-window
+1
+--retrieval-rule
+learned
+--retrieval-selector
+/cache/atomicdance-assets/runs/retrieval_selector_txy_t/selector.pt
+--retrieval-selector-join-band
+0.35
+--seed
+20260902
+--draft-root-continuity
+xy
+--draft-floor-normalize
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/recording_floors.json
+--draft-beat-span
+0.25
+--fix-skate-seam-mask
+8
+--draft-root-seam-smooth
+8
+--retrieval-max-yaw-step
+25.2
+--retrieval-yaw-steps
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps.npz
+--retrieval-max-speed-spike
+3.62
+--retrieval-speed-spikes
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps_speed.npz
+--draft-unit-floor
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_local_floor.npz
+--ingest-root
+/cache/atomicdance-assets/data/wild_ingest_txy_t2_audiofix
+--seam-transition
+after
+--draft-only
+--draft-continue-source
+/cache/atomicdance-assets/runs/txy_t2_seg_beat4/segmentation.json
+--draft-continue-lookahead
+--draft-continue-any-label
+--draft-continue-max-run
+4
+--draft-prefer-full
+0.25
+--draft-prefer-full-mode
+stops
+--draft-hold-by-music

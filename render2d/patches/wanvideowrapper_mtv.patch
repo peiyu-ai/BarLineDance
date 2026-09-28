@@ -1,0 +1,93 @@
+--- a/nodes_sampler.py
++++ b/nodes_sampler.py
+@@ -681,7 +681,9 @@
+                 latent_video_length if context_options is None else context_frames,
+                 24, mtv_input["global_mean"], [mtv_input["global_std"]], device=device)
+             log.info(f"mtv_motion_rotary_emb: {motion_rotary_emb[0].shape}")
+-            mtv_freqs = mtv_freqs.to(device, dtype)
++            # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv_freqs.patch):
++            # rope_apply_3d multiplies view_as_complex(x) by these; a real dtype keeps only cos.
++            mtv_freqs = mtv_freqs.to(device)
+ 
+         #region S2V
+         s2v_audio_input = s2v_ref_latent = s2v_pose = s2v_ref_motion = None
+@@ -1525,6 +1527,26 @@
+                                 noise_pred_no_portrait, noise_pred_ovi, cache_state_uncond = transformer(context=positive_embeds, pred_id=cache_state[0] if cache_state else None,
+                                 vace_data=vace_data, attn_cond=attn_cond, **base_params)
+                                 return noise_pred_no_portrait[0] + portrait_cfg[idx] * (noise_pred_cond - noise_pred_no_portrait[0]), noise_pred_ovi, [cache_state_cond, cache_state_uncond]
++                            elif (mtv_input is not None and mtv_input.get("motion_cfg", 1.0) > 1.0
++                                  and base_params.get("mtv_motion_tokens") is not None):
++                                # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv.patch):
++                                # guidance on the MOTION axis, the way this file already does it for
++                                # fantasy_portrait and audio.  Upstream MTV-Crafter guides motion with
++                                # learnable unconditional tokens, which this checkpoint does not carry;
++                                # dropping the tokens is the nearest stand-in.  Off unless MTV_MOTION_CFG > 1.
++                                base_params["mtv_motion_tokens"] = None
++                                # With negative_guidance the one extra pass carries both axes, the way the
++                                # lynx and one-to-all branches below do it: away from (negative text, no
++                                # motion) toward (positive text, motion).  That is what puts upstream's
++                                # "bad hands, extra limbs, fused fingers" to work at cfg 1, where a
++                                # cfg-distilled LoRA otherwise leaves the negative prompt unused.
++                                away_context = (negative_embeds if (mtv_input.get("negative_guidance")
++                                                and negative_embeds is not None) else positive_embeds)
++                                noise_pred_no_motion, noise_pred_ovi, cache_state_uncond = transformer(
++                                    context=away_context, pred_id=cache_state[0] if cache_state else None,
++                                    vace_data=vace_data, attn_cond=attn_cond, **base_params)
++                                return (noise_pred_no_motion[0] + mtv_input["motion_cfg"] * (noise_pred_cond - noise_pred_no_motion[0]),
++                                        noise_pred_ovi, [cache_state_cond, cache_state_uncond])
+                             elif multitalk_audio_input is not None and not math.isclose(audio_cfg_scale[idx], 1.0):
+                                 base_params['multitalk_audio'] = torch.zeros_like(multitalk_audio_input)[-1:]
+                                 noise_pred_uncond_audio, _, cache_state_uncond = transformer(
+@@ -1898,7 +1920,13 @@
+                                             log.info(f"extra init image index: {extra_init_index}")
+                                         new_init_image = context_reference_latent[extra_init_index, :, 0].to(device)
+                                         partial_img_emb[:, 0] = torch.cat([image_cond[:4, 0].to(device), new_init_image], dim=0)
+-                                else:
++                                elif mtv_input is None or mtv_input.get("window_reference", True):
++                                    # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv.patch):
++                                    # upstream overwrites every later window's FIRST frame with the reference
++                                    # image's conditioning.  With MTV motion that frame is mid-dance, so the
++                                    # window is told "you start from the standing reference" -- measured on
++                                    # 2026-09-18 as near-static stretches, the outfit re-forming and an
++                                    # identity flip at a window boundary.  Switchable, default unchanged.
+                                     new_init_image = image_cond[:, 0].to(device)
+                                     partial_img_emb[:, 0] = new_init_image
+ 
+--- a/nodes.py
++++ b/nodes.py
+@@ -877,6 +877,13 @@
+                     "strength": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.01, "tooltip": "Strength of the MTV motion"}),
+                     "start_percent": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "Start percent to apply the ref "}),
+                     "end_percent": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01, "tooltip": "End percent to apply the ref "}),
++                },
++                "optional": {
++                    # AtomicDance local patch (render2d/patches/wanvideowrapper_mtv.patch):
++                    # guidance on the motion axis; 1.0 = off, one extra pass per step above that.
++                    "motion_cfg": ("FLOAT", {"default": 1.0, "min": 1.0, "max": 10.0, "step": 0.1, "tooltip": "Classifier-free guidance on the MTV motion itself"}),
++                    "negative_guidance": ("BOOLEAN", {"default": False, "tooltip": "Guide away from the NEGATIVE prompt as well as away from no-motion (one pass, both axes)"}),
++                    "window_reference": ("BOOLEAN", {"default": True, "tooltip": "Overwrite each context window's first frame with the reference image's conditioning (upstream behaviour)"}),
+                 }
+         }
+ 
+@@ -885,7 +892,8 @@
+     FUNCTION = "add"
+     CATEGORY = "WanVideoWrapper"
+ 
+-    def add(self, embeds, mtv_crafter_motion, strength, start_percent, end_percent):
++    def add(self, embeds, mtv_crafter_motion, strength, start_percent, end_percent, motion_cfg=1.0,
++            negative_guidance=False, window_reference=True):
+         # Prepare the new extra latent entry
+         new_entry = {
+             "mtv_motion_tokens": mtv_crafter_motion["mtv_motion_tokens"],
+@@ -893,7 +901,10 @@
+             "start_percent": start_percent,
+             "end_percent": end_percent,
+             "global_mean": mtv_crafter_motion["global_mean"],
+-            "global_std": mtv_crafter_motion["global_std"]
++            "global_std": mtv_crafter_motion["global_std"],
++            "motion_cfg": motion_cfg,
++            "negative_guidance": negative_guidance,
++            "window_reference": window_reference,
+         }
+ 
+         # Return a new dict with updated extra_latents

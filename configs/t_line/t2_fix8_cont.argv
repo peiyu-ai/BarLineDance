@@ -1,0 +1,82 @@
+# T line: T2 data/models, fix8 recipe, --face-camera 0, and SOURCE CONTINUATION (DEFECTS §92, 2026-09-23).
+# NOT the default: no operator verdict yet.
+# = t2_fix8_turns.argv + --draft-continue-source (runs/txy_t2_seg_beat4) --draft-continue-lookahead
+#   --draft-continue-any-label --draft-continue-max-run 4.
+# At a bar line the unit's own dancer continues into their next bar (any label, inside the duration
+# band, at most 4 bars in a row) instead of cutting to another dancer; the lookahead picks units whose
+# next bar can fill the next slot.  73-76% of bar lines become the source's own (137/181, 199/264).
+# Measured against t2_fix8_turns on the same plan (test-20 / val-30): a wrist reversal within 16 frames
+# after the bar line, per seam, median 0.71 / 0.72 -> 0.58 / 0.63 (ground truth at the same frames
+# 0.52 / 0.50), paired 12/17 and 18/24 clips lower (val P<0.05); on two fresh planner draws (seeds 7, 11)
+# 0.79->0.65, 0.74->0.61, 0.72->0.59, 0.78->0.61.  Accents/s vs GT -0.229 -> -0.159 (test).
+--data-root
+/cache/atomicdance-assets/scratch/txy_t2/release_aligned_k8_20260922
+--planner-checkpoint
+/cache/atomicdance-assets/runs/planner_aligned_k8_t2_sd20260901/planner_step4500.pt
+--completion-checkpoint
+/cache/atomicdance-assets/runs/completion_txy_t2_seam4_sd20260902/completion_step57600.pt
+--completion-keep-root
+--derive-retrieval-group
+--stochastic-planner
+--draft-bar-prototypes
+--draft-facing-anchor
+0.6
+--draft-facing-continuity
+--draft-recurrence-variety
+--draft-seam-aware-retrieval
+--draft-seam-blend
+12
+--draft-seam-window
+cosine
+--face-camera
+0
+--fix-foot-skate
+1.0
+--floor-anchor
+0.3391
+--index-filler
+--plan-bar-grid
+--plan-bar-tokens
+--plan-min-segment
+1
+--plan-vote-window
+1
+--retrieval-rule
+learned
+--retrieval-selector
+/cache/atomicdance-assets/runs/retrieval_selector_txy_t/selector.pt
+--retrieval-selector-join-band
+0.35
+--seed
+20260902
+--draft-root-continuity
+xy
+--draft-floor-normalize
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/recording_floors.json
+--draft-beat-span
+0.25
+--fix-skate-seam-mask
+8
+--draft-root-seam-smooth
+8
+--retrieval-max-yaw-step
+25.2
+--retrieval-yaw-steps
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps.npz
+--retrieval-max-speed-spike
+3.62
+--retrieval-speed-spikes
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_yaw_steps_speed.npz
+--draft-unit-floor
+/cache/atomicdance-assets/scratch/txy_t2/sidecars_aligned_k8_20260922/release_local_floor.npz
+--ingest-root
+/cache/atomicdance-assets/data/wild_ingest_txy_t2_audiofix
+--seam-transition
+after
+--draft-only
+--draft-continue-source
+/cache/atomicdance-assets/runs/txy_t2_seg_beat4/segmentation.json
+--draft-continue-lookahead
+--draft-continue-any-label
+--draft-continue-max-run
+4
