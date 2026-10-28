@@ -1,0 +1,210 @@
+\begin{thebibliography}{28}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Austin et~al.(2021)Austin, Johnson, Ho, Tarlow, and van~den
+  Berg]{austin2021d3pm}
+Jacob Austin, Daniel~D. Johnson, Jonathan Ho, Daniel Tarlow, and Rianne van~den
+  Berg.
+\newblock Structured denoising diffusion models in discrete state-spaces.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2021.
+
+\bibitem[Cai et~al.(2026)Cai, Sun, Zheng, Chen, Jin, Zhu, and
+  Liu]{cai2026atomic}
+Xinhao Cai, Yixuan Sun, Minghang Zheng, Qingchao Chen, Xin Jin, Song-Chun Zhu,
+  and Yang Liu.
+\newblock Music-to-dance generation via atomic movements.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2026.
+
+\bibitem[Castellon et~al.(2021)Castellon, Donahue, and
+  Liang]{castellon2021jukemir}
+Rodrigo Castellon, Chris Donahue, and Percy Liang.
+\newblock Codified audio language modeling learns useful representations for
+  music information retrieval.
+\newblock In \emph{International Society for Music Information Retrieval
+  Conference (ISMIR)}, 2021.
+
+\bibitem[Chen et~al.(2021)Chen, Tan, Lei, Zhang, Guo, Zhang, and
+  Hu]{chen2021choreomaster}
+Kang Chen, Zhipeng Tan, Jin Lei, Song-Hai Zhang, Yuan-Chen Guo, Weidong Zhang,
+  and Shi-Min Hu.
+\newblock {ChoreoMaster}: Choreography-oriented music-driven dance synthesis.
+\newblock \emph{ACM Transactions on Graphics (Proc. SIGGRAPH)}, 40\penalty0
+  (4), 2021.
+
+\bibitem[Dhariwal et~al.(2020)Dhariwal, Jun, Payne, Kim, Radford, and
+  Sutskever]{dhariwal2020jukebox}
+Prafulla Dhariwal, Heewoo Jun, Christine Payne, Jong~Wook Kim, Alec Radford,
+  and Ilya Sutskever.
+\newblock Jukebox: A generative model for music.
+\newblock \emph{arXiv preprint arXiv:2005.00341}, 2020.
+
+\bibitem[Ellis(2007)]{ellis2007beat}
+Daniel P.~W. Ellis.
+\newblock Beat tracking by dynamic programming.
+\newblock \emph{Journal of New Music Research}, 36\penalty0 (1):\penalty0
+  51--60, 2007.
+
+\bibitem[Ho et~al.(2020)Ho, Jain, and Abbeel]{ho2020ddpm}
+Jonathan Ho, Ajay Jain, and Pieter Abbeel.
+\newblock Denoising diffusion probabilistic models.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2020.
+
+\bibitem[Hu(2024)]{hu2024animateanyone}
+Li~Hu.
+\newblock Animate anyone: Consistent and controllable image-to-video synthesis
+  for character animation.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2024.
+
+\bibitem[Huang et~al.(2021)Huang, Hu, Wu, Sawada, Zhang, and
+  Jiang]{huang2021dancerevolution}
+Ruozi Huang, Huang Hu, Wei Wu, Kei Sawada, Mi~Zhang, and Daxin Jiang.
+\newblock Dance revolution: Long-term dance generation with music via
+  curriculum learning.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2021.
+
+\bibitem[Kovar et~al.(2002)Kovar, Gleicher, and Pighin]{kovar2002motiongraphs}
+Lucas Kovar, Michael Gleicher, and Fr{\'e}d{\'e}ric Pighin.
+\newblock Motion graphs.
+\newblock \emph{ACM Transactions on Graphics (Proc. SIGGRAPH)}, 21\penalty0
+  (3), 2002.
+
+\bibitem[Lee et~al.(2019)Lee, Yang, Liu, Wang, Lu, Yang, and
+  Kautz]{lee2019dancing}
+Hsin-Ying Lee, Xiaodong Yang, Ming-Yu Liu, Ting-Chun Wang, Yu-Ding Lu,
+  Ming-Hsuan Yang, and Jan Kautz.
+\newblock Dancing to music.
+\newblock \emph{Advances in Neural Information Processing Systems (NeurIPS)},
+  2019.
+
+\bibitem[Li et~al.(2023)Li, Zhao, Zhang, Su, Ren, Zhang, Tang, and
+  Li]{li2023finedance}
+Ronghui Li, Junfan Zhao, Yachao Zhang, Mingyang Su, Zeping Ren, Han Zhang,
+  Yansong Tang, and Xiu Li.
+\newblock {FineDance}: A fine-grained choreography dataset for 3d full body
+  dance generation.
+\newblock In \emph{IEEE/CVF International Conference on Computer Vision
+  (ICCV)}, 2023.
+
+\bibitem[Li et~al.(2024)Li, Zhang, Zhang, Zhang, Guo, Zhang, Liu, and
+  Li]{li2024lodge}
+Ronghui Li, YuXiang Zhang, Yachao Zhang, Hongwen Zhang, Jie Guo, Yan Zhang,
+  Yebin Liu, and Xiu Li.
+\newblock Lodge: A coarse to fine diffusion network for long dance generation
+  guided by the characteristic dance primitives.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2024.
+
+\bibitem[Li et~al.(2021)Li, Yang, Ross, and Kanazawa]{li2021aist}
+Ruilong Li, Shan Yang, David~A. Ross, and Angjoo Kanazawa.
+\newblock {AI} choreographer: Music conditioned 3d dance generation with
+  {AIST++}.
+\newblock In \emph{IEEE/CVF International Conference on Computer Vision
+  (ICCV)}, 2021.
+
+\bibitem[Loper et~al.(2015)Loper, Mahmood, Romero, Pons-Moll, and
+  Black]{loper2015smpl}
+Matthew Loper, Naureen Mahmood, Javier Romero, Gerard Pons-Moll, and Michael~J.
+  Black.
+\newblock {SMPL}: A skinned multi-person linear model.
+\newblock \emph{ACM Transactions on Graphics (Proc. SIGGRAPH Asia)},
+  34\penalty0 (6), 2015.
+
+\bibitem[Lugmayr et~al.(2022)Lugmayr, Danelljan, Romero, Yu, Timofte, and
+  Van~Gool]{lugmayr2022repaint}
+Andreas Lugmayr, Martin Danelljan, Andres Romero, Fisher Yu, Radu Timofte, and
+  Luc Van~Gool.
+\newblock {RePaint}: Inpainting using denoising diffusion probabilistic models.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2022.
+
+\bibitem[McFee et~al.(2015)McFee, Raffel, Liang, Ellis, McVicar, Battenberg,
+  and Nieto]{mcfee2015librosa}
+Brian McFee, Colin Raffel, Dawen Liang, Daniel P.~W. Ellis, Matt McVicar, Eric
+  Battenberg, and Oriol Nieto.
+\newblock librosa: Audio and music signal analysis in python.
+\newblock In \emph{Proceedings of the 14th Python in Science Conference}, 2015.
+
+\bibitem[Pavlakos et~al.(2019)Pavlakos, Choutas, Ghorbani, Bolkart, Osman,
+  Tzionas, and Black]{pavlakos2019smplx}
+Georgios Pavlakos, Vasileios Choutas, Nima Ghorbani, Timo Bolkart, Ahmed A.~A.
+  Osman, Dimitrios Tzionas, and Michael~J. Black.
+\newblock Expressive body capture: 3d hands, face, and body from a single
+  image.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2019.
+
+\bibitem[Shen et~al.(2024)Shen, Pi, Xia, Cen, Peng, Hu, Bao, Hu, and
+  Zhou]{shen2024gvhmr}
+Zehong Shen, Huaijin Pi, Yan Xia, Zhi Cen, Sida Peng, Zechen Hu, Hujun Bao,
+  Ruizhen Hu, and Xiaowei Zhou.
+\newblock World-grounded human motion recovery via gravity-view coordinates.
+\newblock In \emph{SIGGRAPH Asia Conference Papers}, 2024.
+
+\bibitem[Shin et~al.(2024)Shin, Kim, Halilaj, and Black]{shin2024wham}
+Soyong Shin, Juyong Kim, Eni Halilaj, and Michael~J. Black.
+\newblock {WHAM}: Reconstructing world-grounded humans with accurate 3d motion.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2024.
+
+\bibitem[Siyao et~al.(2022)Siyao, Yu, Gu, Lin, Wang, Qian, Loy, and
+  Liu]{siyao2022bailando}
+Li~Siyao, Weijiang Yu, Tianpei Gu, Chunze Lin, Quan Wang, Chen Qian,
+  Chen~Change Loy, and Ziwei Liu.
+\newblock Bailando: 3d dance generation by actor-critic {GPT} with
+  choreographic memory.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2022.
+
+\bibitem[Teed et~al.(2023)Teed, Lipson, and Deng]{teed2023dpvo}
+Zachary Teed, Lahav Lipson, and Jia Deng.
+\newblock Deep patch visual odometry.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2023.
+
+\bibitem[Tevet et~al.(2023)Tevet, Raab, Gordon, Shafir, Cohen-Or, and
+  Bermano]{tevet2023mdm}
+Guy Tevet, Sigal Raab, Brian Gordon, Yonatan Shafir, Daniel Cohen-Or, and
+  Amit~H. Bermano.
+\newblock Human motion diffusion model.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2023.
+
+\bibitem[Tseng et~al.(2023)Tseng, Castellon, and Liu]{tseng2023edge}
+Jonathan Tseng, Rodrigo Castellon, and C.~Karen Liu.
+\newblock {EDGE}: Editable dance generation from music.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2023.
+
+\bibitem[{Wan Team}(2025)]{wan2025}
+{Wan Team}.
+\newblock Wan: Open and advanced large-scale video generative models.
+\newblock \emph{arXiv preprint arXiv:2503.20314}, 2025.
+
+\bibitem[Xu et~al.(2022)Xu, Zhang, Zhang, and Tao]{xu2022vitpose}
+Yufei Xu, Jing Zhang, Qiming Zhang, and Dacheng Tao.
+\newblock {ViTPose}: Simple vision transformer baselines for human pose
+  estimation.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2022.
+
+\bibitem[Yang et~al.(2023)Yang, Zeng, Yuan, and Li]{yang2023dwpose}
+Zhendong Yang, Ailing Zeng, Chun Yuan, and Yu~Li.
+\newblock Effective whole-body pose estimation with two-stages distillation.
+\newblock In \emph{IEEE/CVF International Conference on Computer Vision
+  Workshops (ICCVW)}, 2023.
+
+\bibitem[Zhou et~al.(2019)Zhou, Barnes, Lu, Yang, and Li]{zhou2019rot6d}
+Yi~Zhou, Connelly Barnes, Jingwan Lu, Jimei Yang, and Hao Li.
+\newblock On the continuity of rotation representations in neural networks.
+\newblock In \emph{IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, 2019.
+
+\end{thebibliography}

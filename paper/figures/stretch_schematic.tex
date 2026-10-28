@@ -1,0 +1,39 @@
+% Why timing inside the bar matters: uniform stretch vs. music-aware candidate choice.
+\begin{tikzpicture}[font=\sffamily\scriptsize, x=1.45cm, y=1cm, >=Stealth]
+  \def\barlen{4}
+  % ---- row labels
+  \node[anchor=east, align=right] at (-0.15, 2.0) {song beats};
+  \node[anchor=east, align=right] at (-0.15, 1.2) {(a) prototype,\\uniformly stretched};
+  \node[anchor=east, align=right] at (-0.15, 0.2) {(b) candidate chosen by\\step lock + seam lead};
+  % ---- bar frame
+  \foreach \row/\y in {s/2.0, a/1.2, b/0.2} {
+    \draw[gray!60] (0,\y) -- (\barlen,\y);
+  }
+  \foreach \k in {0,1,2,3,4} {
+    \draw[gray!45, dashed] (\k, -0.25) -- (\k, 2.35);
+  }
+  \draw[line width=1.2pt] (0,-0.3) -- (0,2.4) node[above] {bar line};
+  \draw[line width=1.2pt] (4,-0.3) -- (4,2.4) node[above] {bar line};
+  % beats (onsets); the song's beat grid is uneven in phase within the bar
+  \foreach \k in {0,1,2,3} {
+    \fill[black] (\k,2.0) circle (2.2pt);
+  }
+  \node[anchor=west] at (4.1,2.0) {beat $b_k$};
+  % ---- (a) uniform stretch: accents land where stretching puts them
+  \foreach \t in {0.55, 1.65, 2.35, 3.55} {
+    \draw[orange!80!black, line width=1pt] (\t,1.05) -- (\t,1.35);
+    \fill[orange!80!black] (\t,1.2) circle (1.8pt);
+  }
+  \node[anchor=west, text=orange!80!black] at (4.1,1.2) {foot landing};
+  % ---- (b) landings 0.2 beat after the beat
+  \foreach \k in {0,1,2,3} {
+    \pgfmathsetmacro\t{\k+0.2}
+    \draw[blue!70!black, line width=1pt] (\t,0.05) -- (\t,0.35);
+    \fill[blue!70!black] (\t,0.2) circle (1.8pt);
+  }
+  \node[anchor=west, text=blue!70!black] at (4.1,0.2) {landing at $b_k{+}0.2$};
+  % seam lead: cut 0.75 beat before the next bar line
+  \fill[blue!12] (3.25,-0.18) rectangle (4,0.58);
+  \node[text=blue!60!black] at (3.62,-0.35) {seam lead};
+  \draw[<-, blue!60!black] (3.25,0.62) -- ++(0,0.18) node[above, font=\sffamily\tiny]{cut here};
+\end{tikzpicture}
